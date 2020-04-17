@@ -73,12 +73,14 @@ top:
 		if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') { /* ignore leading whitespace */
 		}
 		else if (ch == '(') {
+			token.clear();
 			token.push_back(ch);
 			//*token++ = ch; 
 			//*token = '\0'; 
 			return T_LPAREN;
 		}
 		else if (ch == ')') {
+			token.clear();
 			token.push_back(ch);
 			//*token++ = ch; 
 			//*token = '\0'; 
@@ -86,6 +88,7 @@ top:
 		}
 		else if (ch == '\'') 
 		{
+			token.clear();
 			token.push_back(ch);
 			//*token++ = ch; 
 			//*token = '\0'; 
@@ -95,12 +98,14 @@ top:
 			state = T_COMMENT;
 		}
 		else if (std::strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_:-+=*&^%$#@!~'<>/?`|", ch)) {
+			token.clear();
 			token.push_back(ch);
 			//*token++ = ch; 
 			//*token = '\0';
 			state = T_SYMBOL;
 		}
 		else if (std::strchr("0123456789", ch)) {
+			token.clear();
 			token.push_back(ch);
 			//*token++ = ch; 
 			//*token = '\0';
