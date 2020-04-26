@@ -396,34 +396,7 @@ std::ostream &operator<<(std::ostream &os, OBJECT *obj)
 
     return os;
 }
-/*
-std::string & obj_inspector(OBJECT *obj) 
-{
-	std::string_stream ss;
-	//char *str = static_cast<char*>(malloc(256));
-	if (obj == NIL) {
-		//snprintf(str, 255, "[%p NIL]", (void *)obj);
-		ss  << "[" << (void*) obj << "]";
-		return str;
-	}
-	switch (object_type(obj)) {
-	case PAIR:   snprintf(str, 255, "[%p, CONS %p %p %s] NIL=%p",
-		(void *)obj, (void *)_car(obj), (void *)_cdr(obj),
-		_cdr(obj) == NIL ? "(NIL)" : "",
-		(void *)NIL); break;
-	case SYMBOL: snprintf(str, 255, "[%p, SYMBOL %s]",
-		(void *)obj, obj->value.symbol); break;
-	case STRING: snprintf(str, 255, "[%p, STRING %s]",
-		(void *)obj, obj->value.string); break;
-	case NUMBER: snprintf(str, 255, "[%p, NUMBER %d.%d]",
-		(void *)obj, obj->value.number.integer, obj->value.number.fraction); break;
-	case OPERATOR: snprintf(str, 255, "[%p, OPERATOR ]",
-		(void*)obj); break;
-	default: abort();
-	}
-	return str;
-}
-*/
+
 
 void indent_print_obj(OBJECT *obj, int indent) {
 	int i = 0;
@@ -433,7 +406,6 @@ void indent_print_obj(OBJECT *obj, int indent) {
 	//printf("%s\n", obj_inspector(obj));
 }
 
-/*
 OBJECT * debug(OBJECT *exp) {
 	OBJECT *expr_stack = NIL;
 	int indent = 0;
@@ -470,7 +442,7 @@ next:
 	printf("\n");
 	return NIL;
 }
-*/
+
 int main()
 {
 	//std::string filename = "init.lsp";
