@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
-
+#include <exception>
 
 enum { PAIR = 1, NUMBER = 2, SYMBOL = 3, OPERATOR = 4, POINTER = 5, STRING = 6 };
 typedef struct object OBJECT;
@@ -63,7 +63,7 @@ top:
 	ch = in.get();
 	if (ch == EOF) {
 		if (exit_on_eof == 1) {
-			printf("Exiting.\n");
+			std::cout << "Exiting" << std::endl;
 			exit(0);
 		}
 		return T_NONE;
@@ -75,23 +75,17 @@ top:
 		else if (ch == '(') {
 			token.clear();
 			token.push_back(ch);
-			//*token++ = ch; 
-			//*token = '\0'; 
 			return T_LPAREN;
 		}
 		else if (ch == ')') {
 			token.clear();
 			token.push_back(ch);
-			//*token++ = ch; 
-			//*token = '\0'; 
 			return T_RPAREN;
 		}
 		else if (ch == '\'') 
 		{
 			token.clear();
 			token.push_back(ch);
-			//*token++ = ch; 
-			//*token = '\0'; 
 			return T_QUOTE;
 		}
 		else if (ch == ';') {
@@ -100,22 +94,19 @@ top:
 		else if (std::strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_:-+=*&^%$#@!~'<>/?`|", ch)) {
 			token.clear();
 			token.push_back(ch);
-			//*token++ = ch; 
-			//*token = '\0';
 			state = T_SYMBOL;
 		}
 		else if (std::strchr("0123456789", ch)) {
 			token.clear();
 			token.push_back(ch);
-			//*token++ = ch; 
-			//*token = '\0';
 			state = T_NUMBER;
 		}
 		else if (ch == '"') {
 			state = T_STRING;
 		}
 		else {
-			printf("Error, unexpected '%c' in state %d\n", ch, state);
+			std::cout << "Error, unexpected" << ch << state << std::endl;
+			//printf("Error, unexpected '%c' in state %d\n", ch, state);
 			exit(1);
 		}
 		break;
@@ -130,31 +121,23 @@ top:
 			in.unget();
 			return T_SYMBOL;
 		}
-		//*token++ = ch; 
 		token.push_back(ch);
-		//*token = '\0';
 		break;
 	case T_NUMBER:
 		if (strchr("0123456789", ch) == NULL /* not a number */) 
 		{
-			//ungetc(ch, fp);
 			in.unget();
 			return T_NUMBER;
 		}
-		//*token++ = ch; 
 		token.push_back(ch);
-		//*token = '\0';
 		break;
 	case T_STRING:
 		if (ch == '"') 
 		{
 			token.clear();
-			//*token = '\0';
 			return T_STRING;
 		}
-		//*token++ = ch; 
 		token.push_back(ch);
-		//*token = '\0';
 		break;
 	}
 	goto top;
@@ -241,7 +224,8 @@ OBJECT * _read(std::istream& in, int eof_exit) {
 		}
 		else 
 		{
-			printf("unrecognised token: '%s'\n", token); exit(1);
+			std::cout << "unrecognised token:" << token << std::endl; 
+			exit(1);
 		}
 		expr = _append(expr, obj); /* append the object to the current expression */
 		if (expr_stack == NIL) /* an expression as been read */
@@ -353,10 +337,73 @@ void print(std::ostream &out, SExp &_sexp)
 	}
 }
 
-char * obj_inspector(OBJECT *obj) {
-	char *str = static_cast<char*>(malloc(256));
+std::ostream &operator<<(std::ostream &os, OBJECT *obj)
+{
+    if (obj == NIL) {
+		//snprintf(str, 255, "[%p NIL]", (void *)obj);
+		os  << "[" << (void*) obj << "]";
+		return os;
+	}
+
+	switch (object_type(obj)) {
+	case PAIR:   
+		{
+			os << "[" << (void *)obj 
+			<< (void *)_car(obj)
+			<< (void *)_cdr(obj)
+			<< _cdr(obj) == NIL ? "(NIL)" : "",(void *)NIL); 
+		break;
+		}
+	case SYMBOL: 
+		{
+			os << "[" << (void *)obj
+			<< (void *)obj << obj->value.symbol << "]"; 
+		}
+		break;
+	case STRING:
+		{ 
+			os << "[" << (void *)obj << "STRING" 
+			<<  obj->value.string
+			<< "]";
+		//snprintf(str, 255, "[%p, STRING %s]",
+		//(void *)obj, obj->value.string); 
+		break;
+		}
+	case NUMBER:
+		{
+			os << "["
+			<< obj->value.number.integer
+			<< obj->value.number.fraction
+			<< "]";
+			//snprintf(str, 255, "[%p, NUMBER %d.%d]",
+			//(void *)obj, obj->value.number.integer, obj->value.number.fraction); 
+			break;
+		}
+	case OPERATOR: 
+	{
+		os << "["
+		<< ((void*)obj)
+		<< "OPERATOR ]";
+
+		//snprintf(str, 255, "[%p, OPERATOR ]",
+		//(void*)obj); 
+		break;
+	}
+		
+	default: 
+		abort();
+	}
+
+    return os;
+}
+/*
+std::string & obj_inspector(OBJECT *obj) 
+{
+	std::string_stream ss;
+	//char *str = static_cast<char*>(malloc(256));
 	if (obj == NIL) {
-		snprintf(str, 255, "[%p NIL]", (void *)obj);
+		//snprintf(str, 255, "[%p NIL]", (void *)obj);
+		ss  << "[" << (void*) obj << "]";
 		return str;
 	}
 	switch (object_type(obj)) {
@@ -376,13 +423,17 @@ char * obj_inspector(OBJECT *obj) {
 	}
 	return str;
 }
+*/
 
 void indent_print_obj(OBJECT *obj, int indent) {
 	int i = 0;
-	for (i = 0; i < indent; i++) printf("  ");
-	printf("%s\n", obj_inspector(obj));
+	for (i = 0; i < indent; i++) 
+		std::cout << " " << std::endl;
+	std::cout << obj << std::endl;
+	//printf("%s\n", obj_inspector(obj));
 }
 
+/*
 OBJECT * debug(OBJECT *exp) {
 	OBJECT *expr_stack = NIL;
 	int indent = 0;
@@ -419,7 +470,7 @@ next:
 	printf("\n");
 	return NIL;
 }
-
+*/
 int main()
 {
 	//std::string filename = "init.lsp";
