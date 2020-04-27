@@ -7,6 +7,8 @@
 #include <string.h>
 #include <cstring>
 
+#include <map>
+
  /* structures and functions for representing symbolic expressions .
   * an object structure can store either an atomic type:
   *   a symbol or a number, or a Cons cell.
@@ -123,23 +125,31 @@ top:
 		if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') { /* ignore leading whitespace */
 		}
 		else if (ch == '(') {
-			*token++ = ch; *token = '\0'; return T_LPAREN;
+			*token++ = ch; 
+			*token = '\0'; 
+			return T_LPAREN;
 		}
 		else if (ch == ')') {
-			*token++ = ch; *token = '\0'; return T_RPAREN;
+			*token++ = ch; 
+			*token = '\0'; 
+			return T_RPAREN;
 		}
 		else if (ch == '\'') {
-			*token++ = ch; *token = '\0'; return T_QUOTE;
+			*token++ = ch; 
+			*token = '\0'; 
+			return T_QUOTE;
 		}
 		else if (ch == ';') {
 			state = T_COMMENT;
 		}
 		else if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_:-+=*&^%$#@!~'<>/?`|", ch)) {
-			*token++ = ch; *token = '\0';
+			*token++ = ch; 
+			*token = '\0';
 			state = T_SYMBOL;
 		}   
 		else if (strchr("0123456789", ch)) {
-			*token++ = ch; *token = '\0';
+			*token++ = ch; 
+			*token = '\0';
 			state = T_NUMBER;
 		}
 		else if (ch == '"') {
@@ -160,21 +170,24 @@ top:
 			ungetc(ch, fp);
 			return T_SYMBOL;
 		}
-		*token++ = ch; *token = '\0';
+		*token++ = ch; 
+		*token = '\0';
 		break;
 	case T_NUMBER:
 		if (strchr("0123456789", ch) == NULL /* not a number */) {
 			ungetc(ch, fp);
 			return T_NUMBER;
 		}
-		*token++ = ch; *token = '\0';
+		*token++ = ch; 
+		*token = '\0';
 		break;
 	case T_STRING:
 		if (ch == '"') {
 			*token = '\0';
 			return T_STRING;
 		}
-		*token++ = ch; *token = '\0';
+		*token++ = ch; 
+		*token = '\0';
 		break;
 	}
 	goto top;
@@ -183,8 +196,10 @@ top:
 
 OBJECT * make_symbol(const char *symbol) {
 	OBJECT *obj = NULL; // _interned_syms;
-	//size_t len = strlen(symbol) + 1;
-	//char * storage = 0;
+
+	size_t len = strlen(symbol) + 1;
+	char * storage = 0;
+
 	//for (; obj != NIL; obj = _cdr(obj)) {
 	//	if (strcmp(symbol, symbol_name(_car(obj))) == 0) {
 	//		return _car(obj);
@@ -272,9 +287,11 @@ OBJECT _FALSE = { SYMBOL, { "#f" } };
 
 OBJECT *_interned_syms = NIL;
 
-OBJECT * _object_malloc(int type) {
+OBJECT * _object_malloc(int type) 
+{
 	OBJECT *obj = static_cast<OBJECT *>(malloc(sizeof(OBJECT)));
-	obj->type = type; return obj;
+	obj->type = type; 
+	return obj;
 }
 
 OBJECT * _cons(OBJECT *car, OBJECT *cdr) {
@@ -285,9 +302,11 @@ OBJECT * _cons(OBJECT *car, OBJECT *cdr) {
 }
 
 /* in place reverse */
-OBJECT * _reverse_in_place(OBJECT *expr) {
+OBJECT * _reverse_in_place(OBJECT *expr) 
+{
 	OBJECT *tmp, *revexpr = NIL;
-	while (expr != NIL) {
+	while (expr != NIL) 
+	{
 		tmp = _cdr(expr);
 		_rplacd(expr, revexpr);
 		revexpr = expr;
@@ -296,10 +315,12 @@ OBJECT * _reverse_in_place(OBJECT *expr) {
 	return revexpr;
 }
 
-OBJECT * make_number(const char *token) {
+OBJECT * make_number(const char *token) 
+{
 	OBJECT *obj = _object_malloc(NUMBER);
 	char *dec = std::strchr((char *)token, '.');
-	if (dec) {
+	if (dec) 
+	{
 		*dec = '\0';
 		obj->value.number.fraction = atoi(dec + 1);
 	}
@@ -307,13 +328,15 @@ OBJECT * make_number(const char *token) {
 	return obj;
 }
 
-OBJECT * make_pointer(void * ptr) {
+OBJECT * make_pointer(void * ptr) 
+{
 	OBJECT *obj = _object_malloc(POINTER);
 	obj->value.ptr = ptr;
 	return obj;
 }
 
-OBJECT * make_string(const char *str, size_t length) {
+OBJECT * make_string(const char *str, size_t length) 
+{
 	OBJECT *obj = _object_malloc(STRING);
 	size_t len = strlen(str) + 1;
 	obj->size = length > len ? length : len;
@@ -325,37 +348,47 @@ OBJECT * make_string(const char *str, size_t length) {
 
 #define ERR(x) printf("%s:%d \n", __FILE__, __LINE__); debug(x);
 
-char * obj_inspector(OBJECT *obj) {
+char * obj_inspector(OBJECT *obj) 
+{
 	char *str = static_cast<char*>(malloc(256));
-	if (obj == NIL) {
+	if (obj == NIL) 
+	{
 		snprintf(str, 255, "[%p NIL]", (void *)obj);
 		return str;
 	}
-	switch (object_type(obj)) {
+	switch (object_type(obj)) 
+	{
 	case PAIR:   snprintf(str, 255, "[%p, CONS %p %p %s] NIL=%p",
 		(void *)obj, (void *)_car(obj), (void *)_cdr(obj),
 		_cdr(obj) == NIL ? "(NIL)" : "",
-		(void *)NIL); break;
+		(void *)NIL); 
+		break;
 	case SYMBOL: snprintf(str, 255, "[%p, SYMBOL %s]",
-		(void *)obj, obj->value.symbol); break;
+		(void *)obj, obj->value.symbol); 
+		break;
 	case STRING: snprintf(str, 255, "[%p, STRING %s]",
-		(void *)obj, obj->value.string); break;
+		(void *)obj, obj->value.string); 
+		break;
 	case NUMBER: snprintf(str, 255, "[%p, NUMBER %d.%d]",
-		(void *)obj, obj->value.number.integer, obj->value.number.fraction); break;
+		(void *)obj, obj->value.number.integer, obj->value.number.fraction); 
+		break;
 	case OPERATOR: snprintf(str, 255, "[%p, OPERATOR ]",
-		(void*)obj); break;
+		(void*)obj); 
+		break;
 	default: abort();
 	}
 	return str;
 }
 
-void indent_print_obj(OBJECT *obj, int indent) {
+void indent_print_obj(OBJECT *obj, int indent) 
+{
 	int i = 0;
 	for (i = 0; i < indent; i++) printf("  ");
 	printf("%s\n", obj_inspector(obj));
 }
 
-OBJECT * debug(OBJECT *exp) {
+OBJECT * debug(OBJECT *exp)
+{
 	OBJECT *expr_stack = NIL;
 	int indent = 0;
 next:
@@ -363,7 +396,8 @@ next:
 	if (exp == NIL)
 		goto pop_frame;
 
-	if (object_type(exp) == PAIR) {
+	if (object_type(exp) == PAIR) 
+	{
 		expr_stack = _cons(exp, expr_stack);
 		exp = _car(exp);
 		indent++;
@@ -402,7 +436,7 @@ int main()
 
 	OBJECT *port;
 	FILE *fp;
-	const char filename[] = "init.lsp";
+	const char filename[] = "small.lsp";
 	int no_exit = 0; /* do not exit on EOF */
 	fp = fopen(filename, "r");
 	if (fp == NULL) 
