@@ -511,6 +511,10 @@ int main(int argc, char *argv[]) {
 
 	OBJECT *exp = _read(port, no_exit);
 	debug(exp);
+
+	exp = _read(port, no_exit);
+	debug(exp);
+
 	fclose(fp);
 
 	/*environment = _bind(make_symbol("print"), make_primitive(_print), environment);
@@ -523,7 +527,10 @@ int main(int argc, char *argv[]) {
 	environment = _bind(make_symbol("*"), make_primitive(prim_multiply), environment);
 	environment = _bind(make_symbol("/"), make_primitive(prim_divide), environment);
 	environment = _bind(make_symbol("_"), make_primitive(_eval), environment);
-	environment = _bind(make_symbol("#t"), TRUE, environment);
+	environment = _bind(make_symbol("#t"), TRUE, environment); 
+
+
+
 	environment = _bind(make_symbol("#f"), FALSE, environment);
 
 	command_line(argc, argv, environment);
